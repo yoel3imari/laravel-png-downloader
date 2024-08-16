@@ -2,12 +2,21 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Services\ImageService;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use Illuminate\Support\Str;
 
 class ImageController extends Controller
 {
+    protected ImageService $imageService;
+
+    public function __construct(ImageService $imageService)
+    {
+        $this->imageService = $imageService;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -25,11 +34,11 @@ class ImageController extends Controller
         // convert to jpeg
         // store both png and jpeg
         $validation = $request->validate([
-            'image' => 'required|mimes:png|max:5120',
+            'image' => 'required|image|mimes:png|max:5120',
             'title' => 'required',
             'description' => 'required',
             'tags' => 'required',
-            'category_id' => 'required'
+            'category' => 'required'
         ], [
             'image.required' => 'image is required',
             'image.mimes' => 'image must be of type png',
@@ -37,17 +46,16 @@ class ImageController extends Controller
             'title.required' => 'title is required',
             'description.required' => 'description is required',
             'tags.required' => 'you need at least 5 tags',
-            'category_id' => 'categoy is required'
+            'category.required' => 'categoy is required'
         ]);
 
-        // process image
+        $title = trim($request->input('title'));
 
-        // check if category exist if not return error
-        // $categ = Category::findOrFail($request->category_id);
+        //------- process image -------//
+        $pngImage = $request->file('image');
+        $output = $this->imageService->handleImageUpload($pngImage, $title);
 
-        // if tag not exist create it
-
-        return response()->json(["reQ" => $request]);
+        return response()->json(["message" => "Image added successfully", "image" => $output]);
 
     }
 
@@ -74,5 +82,21 @@ class ImageController extends Controller
     public function destroy(string $id)
     {
         // delete image
+    }
+
+    /**
+     * Download png image
+     */
+    public function download(string $slug) {
+//        // Define the path to the PNG image
+//        $path = storage_path('app/images/png/' . $slug);
+//
+//        // Check if the file exists
+//        if (!file_exists($path)) {
+//            abort(404);
+//        }
+//
+//        // Return the image as a downloadable response
+//        return Response::download($path);
     }
 }
