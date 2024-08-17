@@ -43,7 +43,9 @@ class ImageService
 // Return paths or other relevant information if needed
         return [
             'slug' => $fileName,
-            'jpeg' => $jpegPath,
+            'size' => $pngImage->filesize(),
+            'width' => $pngImage->width(),
+            'height' => $pngImage->height(),
         ];
     }
 }

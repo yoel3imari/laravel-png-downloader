@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Models\Image;
 use App\Services\ImageService;
+use App\Services\TagService;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
@@ -11,10 +13,12 @@ use Illuminate\Support\Str;
 class ImageController extends Controller
 {
     protected ImageService $imageService;
+    protected TagService $tagService;
 
-    public function __construct(ImageService $imageService)
+    public function __construct(ImageService $imageService, TagService $tagService)
     {
         $this->imageService = $imageService;
+        $this->tagService = $tagService;
     }
 
     /**
@@ -50,12 +54,34 @@ class ImageController extends Controller
         ]);
 
         $title = trim($request->input('title'));
+        $description = trim($request->input('description'));
 
         //------- process image -------//
         $pngImage = $request->file('image');
-        $output = $this->imageService->handleImageUpload($pngImage, $title);
+        [$slug, $size, $width, $height] = $this->imageService->handleImageUpload($pngImage, $title);
 
-        return response()->json(["message" => "Image added successfully", "image" => $output]);
+        //------- process tags -------//
+        $tagsId = $this->tagService->processTags($request->input('tags'));
+
+        //------- process category -------//
+        $category = Category::findOrFail($request->input('category'));
+
+        //------- create image model -------//
+        $image = new Image([
+            'slug' => $slug,
+            'title' => $title,
+            'description' => $description,
+            'size' => $size,
+            'width' => $width,
+            'height' => $height,
+            'category_id' => $category->id,
+        ]);
+        $image->save();
+
+        //------- link image tags -------//
+        $image->tags()->attach($tagsId);
+
+        return response()->json(["message" => "Image added successfully", "slug" => $slug]);
 
     }
 
@@ -87,7 +113,8 @@ class ImageController extends Controller
     /**
      * Download png image
      */
-    public function download(string $slug) {
+    public function download(string $slug)
+    {
 //        // Define the path to the PNG image
 //        $path = storage_path('app/images/png/' . $slug);
 //

@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('image_tags', function (Blueprint $table) {
+        Schema::create('image_tag', function (Blueprint $table) {
             $table->id();
             $table->foreignId('image_id')->references('images')->cascadeOnDelete();
             $table->foreignId('tag_id')->references('tags')->cascadeOnDelete();

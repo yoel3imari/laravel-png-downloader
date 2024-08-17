@@ -17,9 +17,10 @@ return new class extends Migration
             $table->string('title');
             $table->text('description');
             $table->string('size'); // in Mb
-            $table->string('dim'); // w x h
-            $table->integer('visits')->default(0); // increment on show
-            $table->integer('downloads')->default(0); // increment on download
+            $table->unsignedInteger('width');
+            $table->unsignedInteger('height');
+            $table->unsignedInteger('visit_count')->default(0); // increment on show
+            $table->unsignedInteger('download_count')->default(0); // increment on download
             $table->foreignId('category_id')->references('categories')->cascadeOnDelete();
             $table->timestamps();
         });
