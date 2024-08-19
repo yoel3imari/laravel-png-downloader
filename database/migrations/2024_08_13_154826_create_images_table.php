@@ -21,7 +21,7 @@ return new class extends Migration
             $table->unsignedInteger('height');
             $table->unsignedInteger('visit_count')->default(0); // increment on show
             $table->unsignedInteger('download_count')->default(0); // increment on download
-            $table->foreignId('category_id')->references('categories')->cascadeOnDelete();
+            $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');
             $table->timestamps();
         });
     }

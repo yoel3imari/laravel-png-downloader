@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('image_tag', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('image_id')->references('images')->cascadeOnDelete();
-            $table->foreignId('tag_id')->references('tags')->cascadeOnDelete();
+            $table->foreignId('image_id')->constrained('images')->onDelete('cascade');
+            $table->foreignId('tag_id')->constrained('tags')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -24,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('image_tags');
+        Schema::dropIfExists('image_tag');
     }
 };
