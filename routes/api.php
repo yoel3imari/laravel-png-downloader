@@ -1,11 +1,13 @@
 <?php
 
+use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\ImageController;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Api\V1\TagController;
 use Illuminate\Support\Facades\Route;
-use App\Models\User;
 
 // auth
 
 // main
 Route::resource('/images', ImageController::class);
+Route::resource('/categories', CategoryController::class);
+Route::resource('/tags', TagController::class);

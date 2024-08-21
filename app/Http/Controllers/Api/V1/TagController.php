@@ -21,7 +21,7 @@ class TagController extends Controller
         // Get search parameters
         $search = $request->query('search');
         $imageCount = $request->query('image_count');
-        $perPage = $request->query('per_page', 10);
+        $perPage = $request->query('per_page', 25);
 
         // Query tags with optional search
         $query = Tag::query();

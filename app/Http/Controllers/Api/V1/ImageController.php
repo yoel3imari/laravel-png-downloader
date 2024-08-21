@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Http\Resources\ImageResource;
+use App\Http\Resources\SearchResource;
 use App\Models\Image;
 use App\Services\ImageService;
+use App\Services\ResponseService;
 use App\Services\TagService;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -24,15 +27,42 @@ class ImageController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request): \Illuminate\Http\JsonResponse
     {
         // search with query params return up to 50 jpeg images
+        $search = $request->get('search');
+        $tags = $request->get('tags');
+        $categories = $request->get('categories');
+        $per_page = $request->get('per_page');
+
+        $query = Image::query();
+
+        if($search) {
+            $query->where('title', 'like', '%' . $search . '%');
+        }
+
+        if(!empty($tags)) {
+            $query->whereHas('tags', function ($query) use ($tags) {
+                $query->whereIn('id', $tags);
+            });
+        }
+
+        if(!empty($categories)) {
+            $query->whereHas('categories', function ($query) use ($categories) {
+                $query->whereIn('id', $categories);
+            });
+        }
+
+        $images = $query->paginate($per_page);
+
+        return ResponseService::success(SearchResource::collection($images)->response()->getData(true));
+
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request): \Illuminate\Http\JsonResponse
     {
         // validate png image
         // convert to jpeg
@@ -91,15 +121,21 @@ class ImageController extends Controller
     public function show(string $id)
     {
         // return jpeg image with details and related images
+        $image = Image::find($id);
+
+        if(empty($image)) {
+            return ResponseService::notFound("Image not found");
+        }
         // maybe use a Recommendation system based on tags and users activities (people also likes)
+        return ResponseService::success(new ImageResource($image));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, string $id): \Illuminate\Http\JsonResponse
     {
-        // update images infos
+        return response()->json("coming soon");
     }
 
     /**
@@ -108,6 +144,7 @@ class ImageController extends Controller
     public function destroy(string $id)
     {
         // delete image
+        return response()->json("coming soon");
     }
 
     /**

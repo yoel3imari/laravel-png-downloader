@@ -20,6 +20,8 @@ class Image extends Model
         'category_id',
     ];
 
+//    protected  $primaryKey = 'slug';
+
     // has one category
     public function category(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
