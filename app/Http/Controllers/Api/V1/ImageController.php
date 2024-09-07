@@ -11,6 +11,7 @@ use App\Services\TagService;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class ImageController extends Controller
@@ -37,17 +38,17 @@ class ImageController extends Controller
 
         $query = Image::query();
 
-        if($search) {
+        if ($search) {
             $query->where('title', 'like', '%' . $search . '%');
         }
 
-        if(!empty($tags)) {
+        if (!empty($tags)) {
             $query->whereHas('tags', function ($query) use ($tags) {
                 $query->whereIn('id', $tags);
             });
         }
 
-        if(!empty($categories)) {
+        if (!empty($categories)) {
             $query->whereHas('categories', function ($query) use ($categories) {
                 $query->whereIn('id', $categories);
             });
@@ -88,13 +89,20 @@ class ImageController extends Controller
 
         //------- process image -------//
         $pngImage = $request->file('image');
-        [$slug, $size, $width, $height] = $this->imageService->handleImageUpload($pngImage, $title);
+        [
+            'slug' => $slug,
+            'size' => $size,
+            'width' => $width,
+            'height' => $height
+        ] = $this->imageService->handleImageUpload($pngImage, $title);
+//        $result = $this->imageService->handleImageUpload($pngImage, $title);
 
         //------- process tags -------//
         $tagsId = $this->tagService->processTags($request->input('tags'));
 
         //------- process category -------//
-        $category = Category::findOrFail($request->input('category'));
+        /*TODO: fix categories*/
+        $category = Category::inRandomOrder()->first();
 
         //------- create image model -------//
         $image = new Image([
@@ -123,7 +131,7 @@ class ImageController extends Controller
         // return jpeg image with details and related images
         $image = Image::find($id);
 
-        if(empty($image)) {
+        if (empty($image)) {
             return ResponseService::notFound("Image not found");
         }
         // maybe use a Recommendation system based on tags and users activities (people also likes)
