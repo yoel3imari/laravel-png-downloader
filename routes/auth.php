@@ -35,3 +35,7 @@ Route::post('/email/verification-notification', [EmailVerificationNotificationCo
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
     ->middleware('auth')
     ->name('logout');
+
+Route::middleware('auth:sanctum')->get('/verify-token', function () {
+    return \App\Services\ResponseService::success(true, "token verified");
+})->name('verification.token');
